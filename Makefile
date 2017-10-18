@@ -1,5 +1,5 @@
 build:
-	docker-compose up -d
+	docker-compose up --build -d
 
 shell:
-	docker exec -it mygoapp bash
+	docker run -v $PWD/src:/go/src -it gokafka_mygoapp:latest bash
