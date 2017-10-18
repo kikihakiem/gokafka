@@ -29,6 +29,5 @@ services:
       - "./src/.env"
     volumes:
       - "./logs:/var/log/"
-      - "./:/go/src"
     links:
       - kafka
