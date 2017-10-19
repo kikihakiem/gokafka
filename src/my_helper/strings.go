@@ -24,16 +24,17 @@ func (e *StringToIntError) Type() string {
 }
 
 // Extract the number from path
-func GetNumber(raw *string) (int, *StringToIntError) {
+func GetNumber(raw *string) (number int, err *StringToIntError) {
 	param := strings.Trim(*raw, "/")
 	if param == "" {
-		return 0, &StringToIntError{"String is empty.", EmptyStr}
+		err = &StringToIntError{"String is empty.", EmptyStr}
+		return
 	}
 
-	number, err := strconv.Atoi(param)
-	if err != nil {
-		return 0, &StringToIntError{"String is non-integer.", NonIntegerStr}
+	number, convertError := strconv.Atoi(param)
+	if convertError != nil {
+		err = &StringToIntError{"String is non-integer.", NonIntegerStr}
 	}
 
-	return number, nil
+	return
 }

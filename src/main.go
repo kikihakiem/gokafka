@@ -10,7 +10,7 @@ import (
 
 func main() {
 	r := gin.Default()
-	r.GET("/*number", func(c *gin.Context) {
+	r.GET("/prime/*number", func(c *gin.Context) {
 		raw := c.Param("number")
 		number, err := my_helper.GetNumber(&raw)
 
@@ -24,46 +24,19 @@ func main() {
 				return
 			}
 
+			// if no number specified, give random number of primes
 			if err.Type() == my_helper.EmptyStr {
 				number = time.Now().Second()
 			}
 		}
 
-		ch := make(chan int) // Create a new channel.
-		go Generate(ch)      // Launch Generate goroutine.
-		var prime_nums []int
-
-		for i := 0; i < number; i++ {
-			prime := <-ch
-			prime_nums = append(prime_nums, prime)
-			ch1 := make(chan int)
-			go Filter(ch, ch1, prime)
-			ch = ch1
-		}
+		primeNums := my_helper.GeneratePrimeNumbers(number)
 
 		c.JSON(200, gin.H{
 			"status":               "OK",
 			"number":               number,
-			"generated_prime_nums": prime_nums,
+			"generated_prime_nums": primeNums,
 		})
 	})
 	r.Run() // listen and serve on 0.0.0.0:8080
-}
-
-// Send the sequence 2, 3, 4, ... to channel 'ch'.
-func Generate(ch chan<- int) {
-	for i := 2; ; i++ {
-		ch <- i // Send 'i' to channel 'ch'.
-	}
-}
-
-// Copy the values from channel 'in' to channel 'out',
-// removing those divisible by 'prime'.
-func Filter(in <-chan int, out chan<- int, prime int) {
-	for {
-		i := <-in // Receive value from 'in'.
-		if i%prime != 0 {
-			out <- i // Send 'i' to 'out'.
-		}
-	}
 }
