@@ -2,9 +2,8 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"log"
-	"strconv"
-	"strings"
+	// "log"
+	"my_helper"
 	"time"
 	// "unicode/utf8"
 )
@@ -12,20 +11,22 @@ import (
 func main() {
 	r := gin.Default()
 	r.GET("/*number", func(c *gin.Context) {
-		param := strings.Trim(c.Param(("number")), "/")
-		number, err := strconv.Atoi(param)
+		raw := c.Param("number")
+		number, err := my_helper.GetNumber(&raw)
 
-		if param != "" && err != nil {
-			c.JSON(400, gin.H{
-				"status":  "Error",
-				"message": "Bad request: PATH should only contain integer or empty.",
-			})
+		if err != nil {
+			if err.Type() == my_helper.NonIntegerStr {
+				c.JSON(400, gin.H{
+					"status":  "Error",
+					"message": "Bad request: PATH should only contain integer or empty.",
+				})
 
-			return
-		}
-		if number == 0 {
-			now := time.Now()
-			number = now.Second()
+				return
+			}
+
+			if err.Type() == my_helper.EmptyStr {
+				number = time.Now().Second()
+			}
 		}
 
 		ch := make(chan int) // Create a new channel.
